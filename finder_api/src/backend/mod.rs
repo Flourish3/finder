@@ -43,7 +43,7 @@ impl Backend {
         match cmd {
             Ok(BackendCommand::Search(query)) => {
                 println!( "Backend recieved query: {}", query );
-                tx.send(BackendResponse::SearchResult(vec!["1".to_string(),"2".to_string()]));
+                tx.send(BackendResponse::SearchResult(vec!["1".to_string(),"2".to_string()])).unwrap();
             }
             Ok(BackendCommand::Reset) => {
                 println!( "Backend recieved reset");

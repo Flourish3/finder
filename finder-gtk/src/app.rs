@@ -67,20 +67,23 @@ impl AppOp{
 
     pub fn activate(&self) {
         let window : gtk::Window = self.gtk_builder
-            .get_object("main-window")
+            .get_object("main_window")
             .expect("Couldn't find main window(AppOp activate)");
-        self.backend.send(BackendCommand::Search("Hello backedn".to_string())).unwrap();
         window.show();
         window.present();
     }
 
     pub fn quit(&self) {
-        println!("Closing application");
+        println!( "Closing application" );
         self.gtk_app.quit();
     }
 
-    pub fn set_state(&mut self, new_state : AppState) {
+    pub fn set_state( &mut self, new_state : AppState ) {
         self.state = new_state;
+    }
+
+    pub fn search_changed( &self, text : Option<String> ) {
+        self.backend.send(BackendCommand::Search(text.unwrap())).unwrap();
     }
 }
 
@@ -95,9 +98,9 @@ impl App {
                 .expect("Failed to initiate GtkApplication");
             
             gtk_app.connect_startup(move |gtk_app| {
-                let gtk_builder = gtk::Builder::new_from_resource("/org/Finder/main-window.glade");
+                let gtk_builder = gtk::Builder::new_from_resource("/org/Finder/main_window.glade");
                 let window : gtk::Window = gtk_builder
-                    .get_object("main-window")
+                    .get_object("main_window")
                     .expect("Couldn't find main window in .ui");
                 
                 window.set_application(gtk_app);
@@ -136,7 +139,7 @@ impl App {
 
     pub fn connect_gtk(&self) {
         let window : gtk::Window = self.gtk_builder
-            .get_object("main-window")
+            .get_object("main_window")
             .expect("Couldn't find main window in ui (connect-gtk)");
 
         window.set_title("Finder");
@@ -147,6 +150,18 @@ impl App {
             op.lock().unwrap().quit();
             Inhibit(false)
         });
+
+        self.connect_text_field();
+    }
+
+    pub fn connect_text_field(&self) {
+        let op = &self.op;
+        let e = self.gtk_builder
+            .get_object::<gtk::SearchEntry>("search_entry")
+            .expect("Couldn't find search_entry in UI");
+        e.connect_search_changed(clone!(op => move |entry| {
+            op.lock().unwrap().search_changed(entry.get_text());
+        }));
     }
 
     pub fn run(&self) {

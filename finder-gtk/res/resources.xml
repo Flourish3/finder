@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
     <gresource prefix="/org/Finder">
-        <file preprocess="xml-stripblanks">main-window.glade</file>
+        <file preprocess="xml-stripblanks">main_window.glade</file>
     </gresource>
 </gresources>
