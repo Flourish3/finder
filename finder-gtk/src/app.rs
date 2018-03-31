@@ -19,9 +19,25 @@ use backend::BackendCommand;
 use backend::BackendResponse;
 use backend;
 
-
-
 const APP_ID : &'static str = "org.Finder";
+
+static mut OP : Option<Arc<Mutex<AppOp>>> = None;
+
+macro_rules! APPOP {
+    ( $fn: ident, ($($x:ident),*) ) => {{
+        if let Some(ctx) = glib::MainContext::default() {
+            ctx.invoke(move || {
+                $( let $x = $x.clone(); )*
+                if let Some(op) = AppOp::def() {
+                    op.lock().unwrap().$fn($($x),*);
+                }
+            });
+        }
+    }};
+    ($fn: ident) => {{
+        APPOP!($fn, ( ) );
+    }}
+}
 
 #[derive(Debug, Clone)]
 pub enum AppState {
@@ -37,7 +53,6 @@ pub struct AppOp {
     pub backend : Sender<backend::BackendCommand>,
 }
 
-static mut OP : Option<Arc<Mutex<AppOp>>> = None;
 
 impl AppOp{
     pub fn def() -> Option<Arc<Mutex<AppOp>>> {
@@ -84,6 +99,10 @@ impl AppOp{
 
     pub fn search_changed( &self, text : Option<String> ) {
         self.backend.send(BackendCommand::Search(text.unwrap())).unwrap();
+    }
+
+    pub fn process_result(&self, _list : Vec<String>) {
+        print!( "Macro works!" );
     }
 }
 
@@ -179,9 +198,9 @@ fn backend_loop( rx : Receiver<BackendResponse> ) {
             }
 
             match recv {
-                Err(RecvError) => {break;}
-                Ok(BackendResponse::SearchResult(list)) => {
-                    println!("App recieved response");
+                Err( RecvError ) => {break;}
+                Ok( BackendResponse::SearchResult(list) ) => {
+                    APPOP!( process_result, (list) );
                 }
             }
         }

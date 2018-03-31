@@ -38,12 +38,10 @@ impl Backend {
     }
 
     pub fn recieve_commad(&mut self, cmd : Result<BackendCommand, RecvError>) -> bool {
-        let tx = self.tx.clone();
 
         match cmd {
             Ok(BackendCommand::Search(query)) => {
-                println!( "Backend recieved query: {}", query );
-                tx.send(BackendResponse::SearchResult(vec!["1".to_string(),"2".to_string()])).unwrap();
+                self.process_query(query);
             }
             Ok(BackendCommand::Reset) => {
                 println!( "Backend recieved reset");
@@ -53,5 +51,10 @@ impl Backend {
             }
         }
         true
+    }
+
+    pub fn process_query( &mut self, _query : String ) {
+        let tx = self.tx.clone();
+        tx.send(BackendResponse::SearchResult(vec!["1".to_string(),"2".to_string()])).unwrap();
     }
 }
