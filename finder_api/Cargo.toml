@@ -1,0 +1,8 @@
+[package]
+name = "finder_api"
+version = "0.1.0"
+authors = ["Johan <johan.tillmar@gmail.com>"]
+workspace = "../"
+
+[dependencies]
+regex = "0.2.10"
