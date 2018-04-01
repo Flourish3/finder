@@ -1,6 +1,8 @@
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc::Sender;
 
+use regex::Regex;
+
 pub enum BackendResponse {
     SearchResult(Vec<String>)
 }
@@ -13,6 +15,7 @@ pub enum BackendCommand {
 pub struct BackendData {
     pub search_query : String,
     pub result : Vec<String>,
+    pub re : Regex,
 }
 
 pub struct Backend {

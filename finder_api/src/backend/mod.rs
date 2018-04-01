@@ -24,6 +24,7 @@ impl Backend {
         let data =  BackendData {
             search_query : "".to_string(),
             result : result,
+            re : Regex::new(r"").unwrap(),
         };
         Backend {
             tx : tx,
@@ -62,10 +63,17 @@ impl Backend {
         true
     }
 
-    pub fn process_query( &mut self, _query : String ) {
+    pub fn process_query( &mut self, query : String ) {
         //Clear result list
         self.data.lock().unwrap().result.clear();
         
+        //Change regex to match query
+        let re : String = "^.*(?i)(".to_string() + &query +").*$";
+        
+        self.data.lock().unwrap().re = Regex::new(format!( r#"{}"#, re ).as_str()).unwrap();
+        /* lazy_static! {
+            static ref  RE : Regex = Regex::new(r"^.+(?i)(api).+$").unwrap();
+        } */
         //Selects current path and start search
         let path = Path::new("./");
         self.visit_dirs(path).unwrap();
@@ -90,15 +98,11 @@ impl Backend {
     }
 
     fn filter_file(&self, path : &Path) {
-        let query : String = "api".to_string();
-        lazy_static! {
-            static ref  RE: Regex = Regex::new(r"^.+\.(?i)(rs|toml)$").unwrap();
-        }
         //let file_name = String::from_str(path.file_stem().unwrap().to_str().unwrap());
         let file_name = path.file_name().unwrap().to_str().unwrap();
-        if RE.is_match(file_name) {
-            println!( "Regex match" );
+        if self.data.lock().unwrap().re.is_match(file_name) {
             let fname = String::from_str(file_name).unwrap();
+            println!( "Regex match: {}", fname );
             self.data.lock().unwrap().result.push(format!("{}", fname));
         }
 

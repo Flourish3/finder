@@ -9,8 +9,6 @@ use std::thread;
 use std::str::FromStr;
 
 use gio::ApplicationExt;
-use gio::SimpleActionExt;
-use gio::ActionMapExt;
 use glib;
 use gio;
 use self::gio::prelude::*;
@@ -135,10 +133,6 @@ impl AppOp{
             mes.show_all();
             lb.add(&mes);
         }
-    }
-
-    pub fn print(&self) {
-        println!( "Activated listbox item" );
     }
 }
 
