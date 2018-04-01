@@ -6,6 +6,8 @@ use std::sync::mpsc::{ Sender, Receiver };
 use std::sync::mpsc::RecvError;
 use std::thread;
 
+use std::str::FromStr;
+
 use gio::ApplicationExt;
 use gio::SimpleActionExt;
 use gio::ActionMapExt;
@@ -101,8 +103,42 @@ impl AppOp{
         self.backend.send(BackendCommand::Search(text.unwrap())).unwrap();
     }
 
-    pub fn process_result(&self, _list : Vec<String>) {
-        print!( "Macro works!" );
+    pub fn process_result(&self, list : Vec<String>) {
+        //Remove old labels
+        let lb = self.gtk_builder
+            .get_object::<gtk::ListBox>("result_list")
+            .expect("Couldn't find result_list in UI");
+         
+        for label in lb.get_children().iter() {
+            lb.remove(label);
+        }
+
+        for item in list.iter() {
+            let lb = self.gtk_builder
+                .get_object::<gtk::ListBox>("result_list")
+                .expect("Couldn't find result_list in UI");
+            
+           
+
+            let mes = gtk::Box::new( gtk::Orientation::Horizontal, 5 );
+            mes.set_margin_top(2);
+            mes.set_margin_bottom(2);
+            //Content
+            let content = gtk::Box::new( gtk::Orientation::Horizontal, 0);
+            let name = String::from_str(item);
+
+            let msg = gtk::Label::new( "" );
+            msg.set_markup(&format!("<b>{}</b>",
+                name.unwrap()));
+            content.add(&msg);
+            mes.pack_start(&content, true, true, 55);
+            mes.show_all();
+            lb.add(&mes);
+        }
+    }
+
+    pub fn print(&self) {
+        println!( "Activated listbox item" );
     }
 }
 
@@ -198,11 +234,12 @@ fn backend_loop( rx : Receiver<BackendResponse> ) {
             }
 
             match recv {
-                Err( RecvError ) => {break;}
+                Err( RecvError ) => { break; }
                 Ok( BackendResponse::SearchResult(list) ) => {
+                    //println!( "Result from backend!" );
                     APPOP!( process_result, (list) );
                 }
-            }
+            };
         }
     });
 }

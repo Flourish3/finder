@@ -1,5 +1,9 @@
 #![deny(unused_extern_crates)]
 
+#[macro_use] 
+extern crate lazy_static;
+extern crate regex;
+
 #[macro_use]
 pub mod util;
 

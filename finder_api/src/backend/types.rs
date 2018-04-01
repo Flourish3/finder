@@ -12,6 +12,7 @@ pub enum BackendCommand {
 
 pub struct BackendData {
     pub search_query : String,
+    pub result : Vec<String>,
 }
 
 pub struct Backend {
